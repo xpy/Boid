@@ -20,6 +20,11 @@ public class Flock {
     public float neighborDist = 50;
     public float separation   = 20f;
 
+    public float separationFactor = 1.0f;
+    public float alignmentFactor = 1.0f;
+    public float cohesionFactor = 1.0f;
+
+    public float viewAngle = 360;
 
     public Flock(PApplet pa) {
         this.pa = pa;

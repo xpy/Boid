@@ -4,6 +4,8 @@ import Boids.Flock.Flock;
 import processing.core.PApplet;
 import processing.core.PVector;
 
+// TODO Optimize with one loop... maybe...
+
 /**
  * Boids
  * Created by xpy on 17-Oct-15.
@@ -16,7 +18,7 @@ public class Boid {
     PVector acceleration;
     float   r;
     float   wallDistance;
-    float   maxforce;    // Maximum steering force
+    float   walkSpeed;    // Maximum steering force
     float   maxSpeed;    // Maximum speed
     float   initialSpeed;    // Maximum speed
 
@@ -35,18 +37,12 @@ public class Boid {
 
         location = new PVector(x, y);
         r = 2.0f;
-        maxSpeed = 10;
+
+        maxSpeed = 2;
         initialSpeed = maxSpeed;
-        maxforce = 0.2f;
+        walkSpeed = 0.2f;
+
         wallDistance = 20;
-    }
-
-    public void setMaxSpeed(float speed) {
-        maxSpeed = speed;
-    }
-
-    public void setMaxForce(float force) {
-        maxforce = force;
     }
 
     public void run(Flock flock) {
@@ -67,41 +63,40 @@ public class Boid {
         PVector ali       = align(flock);      // Alignment
         PVector coh       = cohesion(flock);   // Cohesion
         PVector app       = approach(new PVector(pa.mouseX, pa.mouseY), flock);
+        PVector avo       = avoid(new PVector(pa.mouseX, pa.mouseY), flock);
         PVector wallAvoid = wallAvoid();
-        // Arbitrarily weight these forces
-        sep.mult(1.0f);
-        ali.mult(1.0f);
-        coh.mult(1.0f);
-        app.mult(5.0f);
-        pa.stroke(255, 0, 0);
-        pa.line(location.x, location.y, location.x + app.x, location.y + app.y);
-        pa.noStroke();
-        wallAvoid.mult(100.0f);
-        // Add the force vectors to acceleration
         PVector dir = new PVector(0, 0);
+
+        // Arbitrarily weight these forces
+        sep.mult(flock.separationFactor);
+        ali.mult(flock.alignmentFactor);
+        coh.mult(flock.cohesionFactor);
+        wallAvoid.mult(100.0f);
+
         dir.add(sep);
         dir.add(ali);
         dir.add(coh);
-        dir.add(app);
         dir.add(wallAvoid);
-//        dir.normalize();
-        dir.limit(maxforce);
+
+        dir.limit(walkSpeed);
+
+
+        app.mult(1.0f);
+        avo.mult(0.5f);
+
+
+//        dir.add(app);
+        dir.add(avo);
+
         applyForce(dir);
-/*        applyForce(sep);
-        applyForce(ali);
-        applyForce(coh);
-        applyForce(app);
-        applyForce(wallAvoid);*/
+
     }
 
     // Method to update location
     void update() {
-        // Update velocity
         velocity.add(acceleration);
-        // Limit speed
         velocity.limit(initialSpeed);
         location.add(velocity);
-        // Reset accelertion to 0 each cycle
         acceleration.mult(0);
     }
 
@@ -119,7 +114,6 @@ public class Boid {
 
         // Steering = Desired minus Velocity
         PVector steer = PVector.sub(desired, velocity).normalize(null);
-//        steer.limit(maxforce);  // Limit to maximum steering force
         return steer;
     }
 
@@ -137,7 +131,6 @@ public class Boid {
 
         // Steering = Desired minus Velocity
         PVector steer = PVector.sub(velocity, desired).normalize(null);
-//        steer.limit(maxforce);  // Limit to maximum steering force
         return steer;
     }
 
@@ -169,6 +162,13 @@ public class Boid {
         if (location.y < -r) location.y = pa.height + r;
         if (location.x > pa.width + r) location.x = -r;
         if (location.y > pa.height + r) location.y = -r;
+    }
+
+    private boolean canSeeTarget(PVector target, Flock flock) {
+
+        PVector targetVector = PVector.sub(location, target);
+        return PApplet.degrees((PVector.angleBetween(this.velocity, targetVector))) < flock.viewAngle;
+
     }
 
     PVector wallAvoid() {
@@ -238,7 +238,6 @@ public class Boid {
             steer.normalize();
             steer.mult(initialSpeed);
             steer.sub(velocity);
-//            steer.limit(maxforce);
         }
         return steer.normalize(null);
     }
@@ -268,7 +267,6 @@ public class Boid {
             sum.mult(initialSpeed);
 //            PVector steer = PVector.sub(sum, velocity);
             sum.sub(velocity);
-//            sum.limit(maxforce);
             return sum.normalize(null);
         } else {
             return new PVector(0, 0);
@@ -282,19 +280,39 @@ public class Boid {
         if (!center.equals(this.location)) {
             PVector newPoint = seek(center);
             float dist = PVector.dist(this.location, center);
-            return PVector.mult(newPoint, ( dist / flock.neighborDist) );
+            return PVector.mult(newPoint, (dist / flock.neighborDist));
         } else {
             return new PVector(0, 0);
         }
     }
 
 
-    public PVector approach(PVector point, Flock flock) {
-        float dist = this.location.dist(point);
+    public PVector approach(PVector target, Flock flock) {
+/*
+        // For Circle Around Point
+        PVector desired = PVector.sub(target, location);  // A vector pointing from the location to the target
+        desired.normalize();
+        desired.mult(50);
+        target.sub(desired);
+*/
+        float dist = this.location.dist(target);
         if (dist < flock.neighborDist && dist > 0) {
-            PVector newPoint = seek(point);
+            PVector steer = seek(target);
+//            steer.add(align(flock));
+//            return steer;
+            return PVector.mult(steer, (1 - dist / flock.neighborDist));
+        } else {
+            return new PVector(0, 0);
+
+        }
+    }
+
+    public PVector avoid(PVector point, Flock flock) {
+        float dist = this.location.dist(point);
+        if (dist < flock.neighborDist*2 && dist > 0) {
+            PVector newPoint = avoid(point);
 //            return newPoint;
-            return PVector.mult(newPoint, (1 - dist / flock.neighborDist) -.4f);
+            return PVector.mult(newPoint, (1 - dist / (flock.neighborDist*2)));
         } else {
             return new PVector(0, 0);
 
