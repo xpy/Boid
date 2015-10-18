@@ -2,8 +2,10 @@ package Boids.Flock;
 
 import Boids.Boid.Boid;
 import processing.core.PApplet;
+import processing.core.PVector;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Flock
@@ -11,8 +13,13 @@ import java.util.ArrayList;
  */
 public class Flock {
 
-    public ArrayList<Boid> boids; // An ArrayList for all the boids
-    private PApplet pa;
+    public  ArrayList<Boid> boids; // An ArrayList for all the boids
+    private PApplet         pa;
+
+    // The max distance to check
+    public float neighborDist = 50;
+    public float separation   = 20f;
+
 
     public Flock(PApplet pa) {
         this.pa = pa;
@@ -27,6 +34,22 @@ public class Flock {
 
     public void addBoid(Boid b) {
         boids.add(b);
+    }
+
+    public PVector getCenter() {
+        PVector sum   = new PVector(0, 0);   // Start with empty vector to accumulate all locations
+        int     count = 0;
+        for (Boid other : boids) {
+            sum.add(other.location); // Add location
+            count++;
+        }
+
+        if (count > 0) {
+            sum.div(count);
+            return sum;
+        } else {
+            return new PVector(0, 0);
+        }
     }
 
 
