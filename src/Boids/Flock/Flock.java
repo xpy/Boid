@@ -1,10 +1,12 @@
 package Boids.Flock;
 
 import Boids.Boid.Boid;
+import Boids.FlockWorld.FlockWorld;
 import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -13,8 +15,8 @@ import java.util.Random;
  */
 public class Flock {
 
-    public  ArrayList<Boid> boids; // An ArrayList for all the boids
-    private PApplet         pa;
+    public    ArrayList<Boid> boids; // An ArrayList for all the boids
+    protected PApplet         pa;
 
     // The max distance to check
     public float neighborDist = 40;
@@ -38,7 +40,11 @@ public class Flock {
     public float colorBurst      = 0;
     public int colorBurstStep;
 
-    public int color;
+    public float speedBurstReduce      = .05f;
+    public float sizeBurstReduce       = .05f;
+    public float separationBurstReduce = .5f;
+    public float colorBurstReduce      = .5f;
+
     public int red;
     public int green;
     public int blue;
@@ -51,16 +57,17 @@ public class Flock {
         y = this.pa.height / 2;
         boids = new ArrayList<>(); // Initialize the ArrayList
         Random r = new Random();
-        red =r.nextInt(255);
-        green =r.nextInt(255);
-        blue =r.nextInt(255);
+        red = r.nextInt(255);
+        green = r.nextInt(255);
+        blue = r.nextInt(255);
         colorBurstStep = 10;
 
     }
 
-    public void run() {
+    public void run(FlockWorld fw) {
+
         for (Boid b : boids) {
-            b.run(this);  // Passing the entire list of boids to each boid individually
+            b.run(fw, this);  // Passing the entire list of boids to each boid individually
         }
         normalize();
     }
@@ -97,29 +104,6 @@ public class Flock {
         return maxSpeed + speedBurst;
     }
 
-    public void normalize() {
-        if (speedBurst > 0) {
-            speedBurst -= .05f;
-        } else if (speedBurst < 0) {
-            speedBurst += .05f;
-        }
-        if (sizeBurst > 0) {
-            sizeBurst -= .05f;
-        } else if (sizeBurst < 0) {
-            sizeBurst += .05f;
-        }
-        if (separationBurst > 0) {
-            separationBurst -= .5f;
-        } else if (separationBurst < 0) {
-            separationBurst += .5f;
-        }
-        if (colorBurst > 0) {
-            colorBurst -= .5f;
-        } else if (colorBurst < 0) {
-            colorBurst += .5f;
-        }
-    }
-
     public float getSize() {
         return size + sizeBurst;
     }
@@ -129,6 +113,33 @@ public class Flock {
     }
 
     public int getColor() {
-        return  pa.color(red + colorBurst * colorBurstStep,green + colorBurst * colorBurstStep,blue + colorBurst * colorBurstStep);
+        return pa.color(red + colorBurst * colorBurstStep, green + colorBurst * colorBurstStep, blue + colorBurst * colorBurstStep);
+    }
+
+    public void normalize() {
+        if (speedBurst > 0) {
+            speedBurst -= speedBurstReduce;
+        } else if (speedBurst < 0) {
+            speedBurst += speedBurstReduce;
+        }
+        if (sizeBurst > 0) {
+            sizeBurst -= sizeBurstReduce;
+        } else if (sizeBurst < 0) {
+            sizeBurst += sizeBurstReduce;
+        }
+        if (separationBurst > 0) {
+            separationBurst -= separationBurstReduce;
+        } else if (separationBurst < 0) {
+            separationBurst += separationBurstReduce;
+        }
+        if (colorBurst > 0) {
+            colorBurst -= colorBurstReduce;
+        } else if (colorBurst < 0) {
+            colorBurst += colorBurstReduce;
+        }
+    }
+
+    public List<Boid> getBoids() {
+        return boids;
     }
 }

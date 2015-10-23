@@ -2,6 +2,7 @@ package Boids;
 
 import Boids.Boid.Boid;
 import Boids.Flock.Flock;
+import Boids.FlockWorld.FlockWorld;
 import processing.core.PApplet;
 
 import java.awt.event.KeyEvent;
@@ -13,13 +14,17 @@ import java.awt.event.KeyEvent;
 public class Boids extends PApplet {
 
     Flock flock;
+    FlockWorld fw = new FlockWorld();
 
     public void setup() {
         size(800, 600);
-        flock = new Flock(this);
         // Add an initial set of boids into the system
-        for (int i = 0; i < 150; i++) {
-            flock.addBoid();
+        for (int i = 0; i < 5; i++) {
+            flock = new Flock(this);
+            for (int j = 0; j < 50; j++) {
+                flock.addBoid();
+            }
+            fw.addFlock(flock);
         }
 //        frameRate(1);
     }
@@ -30,7 +35,7 @@ public class Boids extends PApplet {
 //        background(50);
         fill(0, 0, 0, 10);
         rect(0, 0, width, height);
-        flock.run();
+        fw.update();
         noFill();
         stroke(255, 100);
         ellipse(mouseX, mouseY, 200, 200);
@@ -45,28 +50,28 @@ public class Boids extends PApplet {
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyChar()) {
             case 'q':
-                flock.speedBurst+=2;
+                flock.boids.get(0).speedBurst+=5;
                 break;
             case 'a':
-                flock.speedBurst-=2;
+                flock.boids.get(0).speedBurst-=2;
                 break;
             case 'w':
-                flock.separationBurst += 10;
+                flock.boids.get(0).separationBurst += 10;
                 break;
             case 's':
-                flock.separationBurst -= 10;
+                flock.boids.get(0).separationBurst -= 10;
                 break;
             case 'e':
-                flock.sizeBurst += 1;
+                flock.boids.get(0).sizeBurst += 1;
                 break;
             case 'd':
-                flock.sizeBurst -= 1;
+                flock.boids.get(0).sizeBurst -= 1;
                 break;
             case 'r':
-                flock.colorBurst += 20;
+                flock.boids.get(0).colorBurst += 20;
                 break;
             case 'f':
-                flock.colorBurst -= 20;
+                flock.boids.get(0).colorBurst -= 20;
                 break;
 
         }
