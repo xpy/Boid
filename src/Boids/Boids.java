@@ -1,5 +1,6 @@
 package Boids;
 
+import Boids.Avoid.Avoid;
 import Boids.Boid.Boid;
 import Boids.Flock.Flock;
 import Boids.FlockWorld.FlockWorld;
@@ -17,24 +18,24 @@ public class Boids extends PApplet {
     FlockWorld fw = new FlockWorld();
 
     public void setup() {
-        size(800, 600);
+        size(800, 600, P3D);
         // Add an initial set of boids into the system
-        for (int i = 0; i < 5; i++) {
+//        for (int i = 0; i < 1; i++) {
             flock = new Flock(this);
-            for (int j = 0; j < 50; j++) {
+            for (int j = 0; j < 500; j++) {
                 flock.addBoid();
             }
             fw.addFlock(flock);
-        }
+//        }
 //        frameRate(1);
     }
 
 
     public void draw() {
 
-//        background(50);
-        fill(0, 0, 0, 10);
-        rect(0, 0, width, height);
+        background(0);
+//        fill(0, 0, 0, 10);
+//        rect(0, 0, width, height);
         fw.update();
         noFill();
         stroke(255, 100);
@@ -42,7 +43,8 @@ public class Boids extends PApplet {
     }
 
     public void mousePressed() {
-        flock.addBoid(new Boid(this, mouseX, mouseY));
+//        flock.addBoid(new Boid(this, mouseX, mouseY));
+        flock.addAvoid(new Avoid(this, 1, 80, mouseX, mouseY));
 //        flock.separation++;
     }
 
@@ -50,28 +52,46 @@ public class Boids extends PApplet {
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyChar()) {
             case 'q':
-                flock.boids.get(0).speedBurst+=5;
+                flock.speedBurst += 5;
                 break;
             case 'a':
-                flock.boids.get(0).speedBurst-=2;
+                flock.speedBurst -= 2;
                 break;
             case 'w':
-                flock.boids.get(0).separationBurst += 10;
+                flock.separationBurst += 10;
                 break;
             case 's':
-                flock.boids.get(0).separationBurst -= 10;
+                flock.separationBurst -= 10;
                 break;
             case 'e':
-                flock.boids.get(0).sizeBurst += 1;
+                flock.sizeBurst += 1;
                 break;
             case 'd':
-                flock.boids.get(0).sizeBurst -= 1;
+                flock.sizeBurst -= 1;
                 break;
             case 'r':
-                flock.boids.get(0).colorBurst += 20;
+                flock.colorBurst += 20;
                 break;
             case 'f':
-                flock.boids.get(0).colorBurst -= 20;
+                flock.colorBurst -= 20;
+                break;
+            case 't':
+                flock.separationFactor += .1f;
+                break;
+            case 'g':
+                flock.separationFactor -= .1f;
+                break;
+            case 'y':
+                flock.alignmentFactor += .1f;
+                break;
+            case 'h':
+                flock.alignmentFactor -= .1f;
+                break;
+            case 'u':
+                flock.cohesionFactor += .1f;
+                break;
+            case 'j':
+                flock.cohesionFactor -= .1f;
                 break;
 
         }

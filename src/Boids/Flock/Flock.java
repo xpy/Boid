@@ -1,5 +1,6 @@
 package Boids.Flock;
 
+import Boids.Avoid.Avoid;
 import Boids.Boid.Boid;
 import Boids.FlockWorld.FlockWorld;
 import processing.core.PApplet;
@@ -15,18 +16,21 @@ import java.util.Random;
  */
 public class Flock {
 
-    public    ArrayList<Boid> boids; // An ArrayList for all the boids
-    protected PApplet         pa;
+    public ArrayList<Boid> boids; // An ArrayList for all the boids
+    public ArrayList<Avoid> avoids; // An ArrayList for all the boids
+    public ArrayList<Boid> approaches; // An ArrayList for all the boids
+
+    protected PApplet pa;
 
     // The max distance to check
-    public float neighborDist = 40;
-    public float separation   = 10f;
+    public float neighborDist = 50;
+    public float separation   = 20f;
 
-    public float separationFactor = 10.0f;
+    public float separationFactor = 1.00f;
     public float alignmentFactor  = 1f;
     public float cohesionFactor   = 1f;
 
-    public float viewAngle = 120;
+    public float viewAngle = 160;
 
     public float x, y;
 
@@ -51,11 +55,16 @@ public class Flock {
 
     public float size = 2f;
 
+    public boolean absoluteSeparation = false;
+
+    public boolean checkVision = false;
+
     public Flock(PApplet pa) {
         this.pa = pa;
         x = this.pa.width / 2;
         y = this.pa.height / 2;
         boids = new ArrayList<>(); // Initialize the ArrayList
+        avoids = new ArrayList<>(); // Initialize the ArrayList
         Random r = new Random();
         red = r.nextInt(255);
         green = r.nextInt(255);
@@ -69,6 +78,9 @@ public class Flock {
         for (Boid b : boids) {
             b.run(fw, this);  // Passing the entire list of boids to each boid individually
         }
+        for (Avoid a : avoids) {
+            a.run();  // Passing the entire list of boids to each boid individually
+        }
         normalize();
     }
 
@@ -78,6 +90,11 @@ public class Flock {
 
     public void addBoid() {
         boids.add(new Boid(this.pa, this.x, this.y));
+    }
+
+    public void addAvoid(Avoid avoid) {
+        avoids.add(avoid);
+
     }
 
     public PVector getCenter() {
