@@ -1,4 +1,4 @@
-package Boids.Avoid;
+package Boids.FlockWorld;
 
 import processing.core.PApplet;
 import processing.core.PVector;

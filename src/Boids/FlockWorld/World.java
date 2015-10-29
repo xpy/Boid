@@ -1,15 +1,13 @@
 package Boids.FlockWorld;
 
-import Boids.Flock.Flock;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * FlockWorld
+ * World
  * Created by xpy on 21-Oct-15.
  */
-public class FlockWorld {
+public class World {
 
     public List<Flock> flocks = new ArrayList<>();
 

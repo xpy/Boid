@@ -1,9 +1,8 @@
 package Boids;
 
-import Boids.Avoid.Avoid;
-import Boids.Boid.Boid;
-import Boids.Flock.Flock;
-import Boids.FlockWorld.FlockWorld;
+import Boids.FlockWorld.Avoid;
+import Boids.FlockWorld.Flock;
+import Boids.FlockWorld.World;
 import processing.core.PApplet;
 
 import java.awt.event.KeyEvent;
@@ -15,16 +14,16 @@ import java.awt.event.KeyEvent;
 public class Boids extends PApplet {
 
     Flock flock;
-    FlockWorld fw = new FlockWorld();
+    World fw = new World();
 
     public void setup() {
         size(800, 600, P3D);
         // Add an initial set of boids into the system
 //        for (int i = 0; i < 1; i++) {
-            flock = new Flock(this);
-            for (int j = 0; j < 500; j++) {
-                flock.addBoid();
-            }
+        flock = new Flock(this);
+        for (int j = 0; j < 500; j++) {
+            flock.addBoid();
+        }
             fw.addFlock(flock);
 //        }
 //        frameRate(1);

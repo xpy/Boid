@@ -1,12 +1,8 @@
-package Boids.Boid;
+package Boids.FlockWorld;
 
-import Boids.Avoid.Avoid;
-import Boids.Flock.Flock;
-import Boids.FlockWorld.FlockWorld;
 import processing.core.PApplet;
 import processing.core.PVector;
 
-import java.security.PublicKey;
 import java.util.Random;
 
 // TODO Optimize with one loop... maybe...
@@ -58,7 +54,7 @@ public class Boid {
         wallDistance = 20;
     }
 
-    public void run(FlockWorld fw, Flock myFlock) {
+    public void run(World fw, Flock myFlock) {
         normalize();
         for (Flock flock : fw.flocks) {
             flock(flock);

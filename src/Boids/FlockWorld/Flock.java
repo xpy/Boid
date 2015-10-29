@@ -1,8 +1,5 @@
-package Boids.Flock;
+package Boids.FlockWorld;
 
-import Boids.Avoid.Avoid;
-import Boids.Boid.Boid;
-import Boids.FlockWorld.FlockWorld;
 import processing.core.PApplet;
 import processing.core.PVector;
 
@@ -73,7 +70,7 @@ public class Flock {
 
     }
 
-    public void run(FlockWorld fw) {
+    public void run(World fw) {
 
         for (Boid b : boids) {
             b.run(fw, this);  // Passing the entire list of boids to each boid individually
