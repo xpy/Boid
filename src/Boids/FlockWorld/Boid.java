@@ -36,6 +36,7 @@ public class Boid {
     private PVector alignmentSteer;
     private PVector cohesionSteer;
     private PVector avoidSteer = new PVector();
+    private PVector approachSteer = new PVector();
 
     protected PApplet pa;
 
@@ -73,6 +74,7 @@ public class Boid {
     void flock(Flock flock) {
         checkNeighbors(flock);
         checkAvoids(flock);
+        checkApproaches(flock);
         PVector sep       = separationSteer; //separate(flock);   // Separation
         PVector ali       = alignmentSteer; //align(flock);      // Alignment
         PVector coh       = cohesionSteer;//cohesion(flock);   // Cohesion
@@ -99,6 +101,7 @@ public class Boid {
 
 //        dir.add(app);
         dir.add(avoidSteer);
+        dir.add(approachSteer);
         dir.limit(getMaxSpeed(flock));
 
         applyForce(dir);
@@ -244,6 +247,18 @@ public class Boid {
             if (dist < avoid.range && dist > 0) {
                 PVector newPoint = PVector.sub( location,avoid.location);
                 avoidSteer.add(PVector.mult(newPoint, (1 - dist / (flock.neighborDist * 2)) * avoid.power));
+            }
+        }
+    }
+
+    public void checkApproaches(Flock flock) {
+        approachSteer = new PVector(0, 0);
+        for (int i = 0; i < flock.approaches.size(); i++) {
+            Approach approach = flock.approaches.get(i);
+            float dist = this.location.dist(approach.location);
+            if (dist < approach.range && dist > 0) {
+                PVector newPoint = PVector.sub( approach.location,location);
+                approachSteer.add(PVector.mult(newPoint, (1 - dist / (flock.neighborDist * 2)) * approach.power));
             }
         }
     }

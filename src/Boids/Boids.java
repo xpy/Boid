@@ -1,5 +1,6 @@
 package Boids;
 
+import Boids.FlockWorld.Approach;
 import Boids.FlockWorld.Avoid;
 import Boids.FlockWorld.Flock;
 import Boids.FlockWorld.World;
@@ -43,7 +44,8 @@ public class Boids extends PApplet {
 
     public void mousePressed() {
 //        flock.addBoid(new Boid(this, mouseX, mouseY));
-        flock.addAvoid(new Avoid(this, 1, 80, mouseX, mouseY));
+//        flock.addAvoid(new Avoid(this, .00125f, 80, mouseX, mouseY));
+        flock.addApproach(new Approach(this, .0125f, 80, mouseX, mouseY));
 //        flock.separation++;
     }
 

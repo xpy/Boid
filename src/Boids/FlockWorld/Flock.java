@@ -15,7 +15,7 @@ public class Flock {
 
     public ArrayList<Boid> boids; // An ArrayList for all the boids
     public ArrayList<Avoid> avoids; // An ArrayList for all the boids
-    public ArrayList<Boid> approaches; // An ArrayList for all the boids
+    public ArrayList<Approach> approaches; // An ArrayList for all the boids
 
     protected PApplet pa;
 
@@ -62,6 +62,7 @@ public class Flock {
         y = this.pa.height / 2;
         boids = new ArrayList<>(); // Initialize the ArrayList
         avoids = new ArrayList<>(); // Initialize the ArrayList
+        approaches = new ArrayList<>(); // Initialize the ArrayList
         Random r = new Random();
         red = r.nextInt(255);
         green = r.nextInt(255);
@@ -78,6 +79,9 @@ public class Flock {
         for (Avoid a : avoids) {
             a.run();  // Passing the entire list of boids to each boid individually
         }
+        for (Approach a : approaches) {
+            a.run();  // Passing the entire list of boids to each boid individually
+        }
         normalize();
     }
 
@@ -91,6 +95,11 @@ public class Flock {
 
     public void addAvoid(Avoid avoid) {
         avoids.add(avoid);
+
+    }
+
+    public void addApproach(Approach approach) {
+        approaches.add(approach);
 
     }
 
