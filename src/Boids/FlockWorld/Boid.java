@@ -35,7 +35,7 @@ public class Boid {
     private PVector separationSteer;
     private PVector alignmentSteer;
     private PVector cohesionSteer;
-    private PVector avoidSteer = new PVector();
+    private PVector avoidSteer    = new PVector();
     private PVector approachSteer = new PVector();
 
     protected PApplet pa;
@@ -75,9 +75,9 @@ public class Boid {
         checkNeighbors(flock);
         checkAvoids(flock);
         checkApproaches(flock);
-        PVector sep       = separationSteer; //separate(flock);   // Separation
-        PVector ali       = alignmentSteer; //align(flock);      // Alignment
-        PVector coh       = cohesionSteer;//cohesion(flock);   // Cohesion
+        PVector sep = separationSteer; //separate(flock);   // Separation
+        PVector ali = alignmentSteer; //align(flock);      // Alignment
+        PVector coh = cohesionSteer;//cohesion(flock);   // Cohesion
 //        PVector app       = approach(new PVector(pa.mouseX, pa.mouseY), flock);
 //        PVector avo       = avoid(new PVector(pa.mouseX, pa.mouseY), flock);
         PVector wallAvoid = wallAvoid();
@@ -148,10 +148,10 @@ public class Boid {
 
     // Wraparound
     void borders(Flock flock) {
-        if (location.x < -1 * getSize(flock)) location.x = pa.width + getSize(flock);
-        if (location.y < -1 * getSize(flock)) location.y = pa.height + getSize(flock);
-        if (location.x > pa.width + getSize(flock)) location.x = -getSize(flock);
-        if (location.y > pa.height + getSize(flock)) location.y = -getSize(flock);
+        if (location.x < -1 * getSize(flock)) location.x = pa.width + location.x + getSize(flock);
+        if (location.y < -1 * getSize(flock)) location.y = pa.height + location.y + getSize(flock);
+        if (location.x > pa.width + getSize(flock)) location.x = -getSize(flock) + location.x - pa.width;
+        if (location.y > pa.height + getSize(flock)) location.y = -getSize(flock) + location.y - pa.height;
     }
 
     private boolean canSeeTarget(PVector target, Flock flock) {
@@ -199,35 +199,42 @@ public class Boid {
         separationSteer = new PVector(0, 0, 0);
         alignmentSteer = new PVector(0, 0, 0);
         cohesionSteer = new PVector(0, 0, 0);
-        int cohesionCount = 0;
-
+        float manhatanDist     = 0;
+        int   cohesionCount    = 0;
+        int   separationChecks = 0;
         for (Boid other : flock.getBoids()) {
-            float d = PVector.dist(location, other.location);
-            // Check Separation
-            if ((d > 0) && (d < getSeparation(flock))) {
-                if (true || canSeeTarget(other.location, flock)) {
-                    if (flock.absoluteSeparation) {
-                        separationSteer.add(PVector.sub(location, other.location));
-                    } else {
-                        PVector diff = PVector.sub(other.location, location);
-                        PVector normalDiff = diff.normalize(null);
-                        normalDiff.mult(getSeparation(flock) * -1);
-                        diff = PVector.add(diff, normalDiff);
-                        separationSteer.add(diff);
+            manhatanDist = Flock.manhatanDist(location, other.location);
+            if (manhatanDist < 1.5 * flock.neighborDist) {
+                float d = PVector.dist(location, other.location);
+                float d2 = PVector.dist(new PVector(location.x + ((location.x > pa.width / 2) ? -1 : 1) * pa.width, location.y + ((location.y > pa.height / 2) ? -1 : 1) * pa.height), other.location);
+                float separation = getSeparation(flock);
+                // Check Separation
+                if ((d > 0) && manhatanDist < separation && (d < separation || d2 < separation)) {
+                    if (true || canSeeTarget(other.location, flock)) {
+                        separationChecks++;
+                        if (flock.absoluteSeparation) {
+                            separationSteer.add(PVector.sub(location, other.location));
+                        } else {
+                            PVector diff = PVector.sub(other.location, location);
+                            PVector normalDiff = diff.normalize(null);
+                            normalDiff.mult(getSeparation(flock) * -1);
+                            diff = PVector.add(diff, normalDiff);
+                            separationSteer.add(diff);
+                        }
+                    } else if (d == 0 && this != other) {
+                        separationSteer.add(PVector.mult(velocity.normalize(null), getSeparation(flock), null));
                     }
-                } else if (d == 0 && this != other) {
-                    separationSteer.add(PVector.mult(velocity.normalize(null), getSeparation(flock), null));
                 }
-            }
 
-            if ((d >= 0) && (d < flock.neighborDist) && this != other) {
+                if ((d >= 0) && manhatanDist < flock.neighborDist && (d < flock.neighborDist || (d2 < flock.neighborDist)) && this != other) {
 
-                // Check alignment
-                if (true || canSeeTarget(other.location, flock)) {
-                    alignmentSteer.add(PVector.mult(other.velocity, 1 - d / flock.neighborDist, null));
-                    // Check cohesion
-                    cohesionSteer.add(other.location); // Add location
-                    cohesionCount++;
+                    // Check alignment
+                    if (true || canSeeTarget(other.location, flock)) {
+                        alignmentSteer.add(PVector.mult(other.velocity, 1 - d / flock.neighborDist, null));
+                        // Check cohesion
+                        cohesionSteer.add(other.location); // Add location
+                        cohesionCount++;
+                    }
                 }
             }
         }
@@ -245,7 +252,7 @@ public class Boid {
             Avoid avoid = flock.avoids.get(i);
             float dist = this.location.dist(avoid.location);
             if (dist < avoid.range && dist > 0) {
-                PVector newPoint = PVector.sub( location,avoid.location);
+                PVector newPoint = PVector.sub(location, avoid.location);
                 avoidSteer.add(PVector.mult(newPoint, (1 - dist / (flock.neighborDist * 2)) * avoid.power));
             }
         }
@@ -257,7 +264,7 @@ public class Boid {
             Approach approach = flock.approaches.get(i);
             float dist = this.location.dist(approach.location);
             if (dist < approach.range && dist > 0) {
-                PVector newPoint = PVector.sub( approach.location,location);
+                PVector newPoint = PVector.sub(approach.location, location);
                 approachSteer.add(PVector.mult(newPoint, (1 - dist / (flock.neighborDist * 2)) * approach.power));
             }
         }

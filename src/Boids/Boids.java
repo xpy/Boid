@@ -22,7 +22,7 @@ public class Boids extends PApplet {
         // Add an initial set of boids into the system
 //        for (int i = 0; i < 1; i++) {
         flock = new Flock(this);
-        for (int j = 0; j < 500; j++) {
+        for (int j = 0; j < 2000; j++) {
             flock.addBoid();
         }
             fw.addFlock(flock);
@@ -33,9 +33,9 @@ public class Boids extends PApplet {
 
     public void draw() {
 
-        background(0);
-//        fill(0, 0, 0, 10);
-//        rect(0, 0, width, height);
+//        background(0);
+        fill(0, 0, 0, 10);
+        rect(0, 0, width, height);
         fw.update();
         noFill();
         stroke(255, 100);

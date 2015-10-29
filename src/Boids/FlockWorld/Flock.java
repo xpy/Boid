@@ -13,8 +13,8 @@ import java.util.Random;
  */
 public class Flock {
 
-    public ArrayList<Boid> boids; // An ArrayList for all the boids
-    public ArrayList<Avoid> avoids; // An ArrayList for all the boids
+    public ArrayList<Boid>     boids; // An ArrayList for all the boids
+    public ArrayList<Avoid>    avoids; // An ArrayList for all the boids
     public ArrayList<Approach> approaches; // An ArrayList for all the boids
 
     protected PApplet pa;
@@ -164,5 +164,16 @@ public class Flock {
 
     public List<Boid> getBoids() {
         return boids;
+    }
+
+    public List<Boid> getSortedBoids() {
+        List<Boid> sortedBoids = new ArrayList<>();
+
+        return boids;
+    }
+
+    public static float manhatanDist(PVector a, PVector b) {
+        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+
     }
 }
